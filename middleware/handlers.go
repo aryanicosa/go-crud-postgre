@@ -83,6 +83,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(res)
 }
 
+//get a user
 func GetUser(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
     w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -106,6 +107,48 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
     //send response
     json.NewEncoder(w).Encode(user)
+}
+
+//update a user
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "PUT")
+    w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+    //get the useid from params, key is "id"
+    params := mux.Vars(r)
+
+    //convert id form string to int
+    id, err := strconv.Atoi(params["id"])
+
+    if err != nil {
+        log.Fatalf("unable to convert the string into int, value : %v", err)
+    }
+
+     // create an empty user of type models.User
+     var user models.User
+
+     // decode the json request to user
+     err = json.NewDecoder(r.Body).Decode(&user)
+ 
+     if err != nil {
+         log.Fatalf("Unable to decode the request body.  %v", err)
+     }
+ 
+     // call insert user function and pass the user
+     updateRow := updateUser(int64(id), user)
+
+     msg := fmt.Sprintf("User updated successfully, total rows affected %v", updateRow)
+ 
+     // format a response object
+     res := response{
+         ID:      int64(id),
+         Message:  msg,
+     }
+ 
+     // send the response
+     json.NewEncoder(w).Encode(res)
 }
 
 //------------------------- handler functions ----------------
@@ -171,4 +214,34 @@ func getUser(id int64) (models.User, error) {
 
     //return empty on error
     return user, err
+}
+
+func updateUser(id int64, user models.User) int64 {
+    // create the postgres db connection
+    db := createConnection()
+
+    // close the db connection
+    defer db.Close()
+
+    // create the insert sql query
+    // returning userid will return the id of the inserted user
+    sqlStatement := `UPDATE users SET name=$2, location=$3, age=$4 where userid=$1`
+
+    // execute the sql statement
+    res, err := db.Exec(sqlStatement, id, user.Name, user.Location, user.Age)
+
+    if err != nil {
+        log.Fatalf("Unable to execute the query. %v", err)
+    }
+
+    //check rows affected
+    rowsAffected, err := res.RowsAffected()
+
+    if err != nil {
+        log.Fatalf("Error while checking rows affected %v", err)
+    }
+
+    fmt.Printf("Total %v rows affected", rowsAffected)
+
+    return rowsAffected
 }

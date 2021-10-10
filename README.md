@@ -1,6 +1,7 @@
-# go-crud-postgre
+# Go crud postgresql
 
 In this project we will create CRUD application with GO and Postgresql
+After the CRUD application ready, we try to hit the API using Postman
 
 1. go mod init github.com/aryanicosa/go-crud-postgre
 "go modules is dependency manager, it is similar to the package.json in nodejs"
