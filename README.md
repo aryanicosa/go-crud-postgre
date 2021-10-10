@@ -11,7 +11,7 @@ In this project we will create CRUD application with GO and Postgresql
 - `go get github.com/joho/godotenv` -> For saving environment variables to keep sensitive data
 
 3. Create database
-- switch to root account
+*switch to root account
 - createdb go_crud_1
 - psql -d go_crud_1
 - \conninfo
@@ -44,3 +44,8 @@ write `POSTGRE_DB="postgres://username:password@hostname/databasename"` in the .
 
 8. Run the project
 - `go run main.go`
+
+OR 
+
+Build the project
+- `go build` then run `./go-crud`

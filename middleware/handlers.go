@@ -4,16 +4,17 @@ import (
 	"database/sql"
 	"encoding/json" //encode and decode json to struct
 	"fmt"
-	"github.com/aryanicosa/go-crud-postgre/models"
 	"log"
 	"net/http" //access request and response object of the api
-	"os" //use to read environment variable
-	//"strconv"
+	"os"       //use to read environment variable
+    "strconv"
 
-	//"github.com/gorilla/mux" // used to get the params from the route
+	"github.com/aryanicosa/go-crud-postgre/models"
+    
+    "github.com/gorilla/mux" // used to get the params from the route
 
-    "github.com/joho/godotenv" // package used to read the .env file
-    _ "github.com/lib/pq"      // postgres golang driver
+	"github.com/joho/godotenv" // package used to read the .env file
+	_ "github.com/lib/pq"      // postgres golang driver
 )
 
 //respnse format
@@ -82,6 +83,31 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(res)
 }
 
+func GetUser(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+
+    //get the useid from params, key is "id"
+    params := mux.Vars(r)
+
+    //convert id form string to int
+    id, err := strconv.Atoi(params["id"])
+
+    if err != nil {
+        log.Fatalf("unable to convert the string into int, value : %v", err)
+    }
+
+    //call the getUser function
+    user, err := getUser(int64(id))
+
+    if err != nil {
+        log.Fatalf("unable to get user, value : %v", err)
+    }
+
+    //send response
+    json.NewEncoder(w).Encode(user)
+}
+
 //------------------------- handler functions ----------------
 // insert one user in the DB
 func insertUser(user models.User) int64 {
@@ -111,4 +137,38 @@ func insertUser(user models.User) int64 {
 
     // return the inserted id
     return id
+}
+
+//function to get a user by id
+func getUser(id int64) (models.User, error) {
+    // create the postgres db connection
+    db := createConnection()
+
+    // close the db connection
+    defer db.Close()
+
+    //create a user of model.User type
+    var user models.User
+
+    //query the user
+    sqlStatement := `SELECT * FROM users where userid=$1`
+
+    //execute the quey
+    row := db.QueryRow(sqlStatement, id)
+
+    //unmarshall the row object to user struct
+    err := row.Scan(&user.ID, &user.Name, &user.Age, &user.Location)
+
+    switch err {
+    case sql.ErrNoRows:
+        fmt.Println("No row were returned!")
+        return user, nil
+    case nil:
+        return user, nil
+    default:
+        log.Fatalf("Unable to scan the row, %v", err)
+    }
+
+    //return empty on error
+    return user, err
 }
