@@ -1,6 +1,6 @@
 # Go crud postgresql
 
-In this project we will create CRUD application with GO and Postgresql
+In this project we will create CRUD application with GO and Postgresql.
 After the CRUD application ready, we try to hit the API using Postman
 
 1. go mod init github.com/aryanicosa/go-crud-postgre
