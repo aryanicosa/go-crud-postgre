@@ -50,3 +50,19 @@ OR
 
 Build the project
 - `go build` then run `./go-crud`
+
+Documentation :
+**Create User**
+![Create User](/doc_postman/createUser.png)
+
+**Get User**
+![Get User](/doc_postman/getUser.png)
+
+**Update User**
+![Update User](/doc_postman/updateUser.png)
+
+**Delete User**
+![Delete User](/doc_postman/deleteUser.png)
+
+**Get All Users**
+![Get All Users](/doc_postman/getAllUsers.png)
